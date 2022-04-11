@@ -1,8 +1,15 @@
 import sys
 from lib import cypher
 
-from PyQt5.QtWidgets import QApplication, QGridLayout, QPushButton, QWidget, QTextEdit, QComboBox, QLabel, QLineEdit
-from PyQt5.QtGui import QTextCursor
+from PyQt5.QtWidgets import QApplication, QGridLayout, QPushButton, QWidget, QTextEdit, QComboBox, QLabel, QLineEdit,\
+    QMessageBox
+from PyQt5.QtCore import QRegExp
+from PyQt5.QtGui import QTextCursor, QRegExpValidator
+
+
+disabled_style = """QLineEdit:disabled {
+background-color:#D8D8D8;
+}"""
 
 
 class QTextEditWrapper(QTextEdit):
@@ -63,6 +70,18 @@ class MainWindow(QWidget):
         self.privExpData = QLineEdit()
         self.productData = QLineEdit()
 
+        self.caesarData.setValidator(QRegExpValidator(QRegExp(r"\d+")))
+        self.vernamData.setValidator(QRegExpValidator(QRegExp(r"[a-zA-Z]+")))
+        self.pubExpData.setValidator(QRegExpValidator(QRegExp(r"\d+")))
+        self.privExpData.setValidator(QRegExpValidator(QRegExp(r"\d+")))
+        self.productData.setValidator(QRegExpValidator(QRegExp(r"\d+")))
+
+        self.caesarData.setStyleSheet(disabled_style)
+        self.vernamData.setStyleSheet(disabled_style)
+        self.pubExpData.setStyleSheet(disabled_style)
+        self.privExpData.setStyleSheet(disabled_style)
+        self.productData.setStyleSheet(disabled_style)
+
         self.pubExpData.textChanged.connect(self.disable_private)
         self.privExpData.textChanged.connect(self.disable_public)
         self.action = QPushButton("Encrypt/Decrypt")
@@ -108,18 +127,49 @@ class MainWindow(QWidget):
     def transform(self):
         self.output.clear()
         method = self.options.currentText()
-        if method == 'Caesar':
-            self.cypher.load('Caesar', int(self.caesarData.text()), "", (0, 0))
-        elif method == 'Vernam':
-            self.cypher.load('Vernam', 0, self.vernamData.text(), (0, 0))
-        else:
-            if self.pubExpData.isEnabled():
-                self.cypher.load('RSA', 0, "", (int(self.pubExpData.text()), int(self.productData.text())))
+
+        error_message = None
+
+        try:
+            if method == 'Caesar':
+                self.cypher.load('Caesar', int(self.caesarData.text()), "", (0, 0))
+            elif method == 'Vernam':
+                self.cypher.load('Vernam', 0, self.vernamData.text(), (0, 0))
             else:
-                self.cypher.load('RSA', 0, "", (int(self.privExpData.text()), int(self.productData.text())))
-                self.cypher.decrypt()
-                return
-        self.cypher.encrypt()
+                if self.pubExpData.isEnabled():
+                    self.cypher.load('RSA', 0, "", (int(self.pubExpData.text()), int(self.productData.text())))
+                else:
+                    self.cypher.load('RSA', 0, "", (int(self.privExpData.text()), int(self.productData.text())))
+                    self.cypher.decrypt()
+                    return
+
+            self.cypher.encrypt()
+        except ValueError:
+            if method == 'Caesar':
+                error_message = "Please, provide an offset for Caesar"
+            elif method == 'RSA':
+                is_encrypting = self.pubExpData.text() and self.productData.text()
+                is_decrypting = self.privExpData.text() and self.productData.text()
+                if is_encrypting:
+                    error_message = "Please, provide a correct RSA-key"
+                elif is_decrypting:
+                    error_message = "Incorrect input: expected sequence of hexadecimal numbers"
+                else:
+                    error_message = "Please, provide a key for RSA"
+        except ZeroDivisionError:
+            error_message = "Please, provide a key for Vernam"
+        except OverflowError:
+            error_message = "Invalid RSA key"
+        except Exception as error:
+            error_message = "Unknown error: {TRACEBACK}".format(TRACEBACK=error)
+
+        if error_message is not None:
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Unexpected Error")
+            msg.setInformativeText(error_message)
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
     def do_crack(self):
         self.output.clear()

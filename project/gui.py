@@ -1,11 +1,11 @@
 import sys
-from lib import cypher
 
-from PyQt5.QtWidgets import QApplication, QGridLayout, QPushButton, QWidget, QTextEdit, QComboBox, QLabel, QLineEdit,\
-    QMessageBox
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QTextCursor, QRegExpValidator
+from PyQt5.QtWidgets import QApplication, QGridLayout, QPushButton, QWidget, QTextEdit, QComboBox, QLabel, QLineEdit, \
+    QMessageBox
 
+from lib import cypher
 
 disabled_style = """QLineEdit:disabled {
 background-color:#D8D8D8;
@@ -175,15 +175,15 @@ class MainWindow(QWidget):
         self.output.clear()
         self.cypher.crack()
 
-    def change_mode(self, newPos: int):
-        if newPos == 0:
+    def change_mode(self, new_pos: int):
+        if new_pos == 0:
             self.crack.setEnabled(True)
             self.caesarData.setEnabled(True)
             self.vernamData.setEnabled(False)
             self.pubExpData.setEnabled(False)
             self.privExpData.setEnabled(False)
             self.productData.setEnabled(False)
-        elif newPos == 1:
+        elif new_pos == 1:
             self.crack.setEnabled(False)
             self.vernamData.setEnabled(True)
             self.caesarData.setEnabled(False)

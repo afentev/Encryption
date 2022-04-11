@@ -57,12 +57,12 @@ def is_prime(number: int, param: int) -> bool:
     return True
 
 
-def get_prime(len_bytes: int) -> int:
-    lower_bound = 2 ** (len_bytes - 1)
+def get_prime(len_bits: int) -> int:
+    lower_bound = 2 ** (len_bits - 1)
     upper_bound = 2 * lower_bound - 1
     while True:
         number = random.randint(lower_bound, upper_bound)
-        if is_prime(number, len_bytes):
+        if is_prime(number, len_bits):
             return number
 
 
@@ -79,11 +79,11 @@ def euclidean_reverse(e: int, m: int) -> int:
     return i
 
 
-def get_rsa_keys(len_bytes: int) -> Tuple[Tuple[int, int], Tuple[int, int]]:
-    p = get_prime(len_bytes)
+def get_rsa_keys(len_bits: int) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+    p = get_prime(len_bits)
     q = p
     while p == q:
-        q = get_prime(len_bytes)
+        q = get_prime(len_bits)
 
     n = p * q
     f = (p - 1) * (q - 1)

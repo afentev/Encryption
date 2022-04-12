@@ -34,33 +34,23 @@ class Cypher:
 
     @IOwrapper
     def encrypt(self):
-        self.__encrypt()
+        self.__transform(True)
 
     @IOwrapper
     def decrypt(self):
-        self.__decrypt()
+        self.__transform(False)
 
     @IOwrapper
     def crack(self):
         self.__crack()
 
-    def __encrypt(self):
+    def __transform(self, is_encryption: bool):
         if self.__mode == 'Caesar':
-            self.__outputText = self.__caesar(True, self.__caesarSecret)
+            self.__outputText = self.__caesar(is_encryption, self.__caesarSecret)
         elif self.__mode == 'Vernam':
-            self.__outputText = self.__vernam(True, self.__vernamSecret)
+            self.__outputText = self.__vernam(is_encryption, self.__vernamSecret)
         elif self.__mode == 'RSA':
-            self.__outputText = self.__rsa(True, self.__rsaSecret)
-        else:
-            raise "Unknown encryption mode"
-
-    def __decrypt(self):
-        if self.__mode == 'Caesar':
-            self.__outputText = self.__caesar(False, self.__caesarSecret)
-        elif self.__mode == 'Vernam':
-            self.__outputText = self.__vernam(False, self.__vernamSecret)
-        elif self.__mode == 'RSA':
-            self.__outputText = self.__rsa(False, self.__rsaSecret)
+            self.__outputText = self.__rsa(is_encryption, self.__rsaSecret)
         else:
             raise "Unknown encryption mode"
 
